@@ -1,0 +1,10 @@
+use('fard');
+
+db.createCollection('topArtists');
+db.topArtists.createIndex({ name: 1 }, { unique: true });
+
+db.createCollection('singles');
+db.singles.createIndex({ releaseId: 1 }, { unique: true });
+
+db.createCollection('albums');
+db.albums.createIndex({ releaseId: 1 }, { unique: true });

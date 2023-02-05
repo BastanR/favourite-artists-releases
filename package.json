@@ -1,0 +1,30 @@
+{
+  "name": "favourite-artists-releases",
+  "version": "1.0.0",
+  "description": "List of releases by favourite artits",
+  "main": "index.js",
+  "scripts": {
+    "init": "",
+    "getArtists": "node ./src/getArtists/index.js",
+    "getReleases": "node ./src/getReleases/index.js",
+    "sendDigest": "node ./src/sendDigest/index.js"
+  },
+  "keywords": [
+    "spotify",
+    "last.fm",
+    "music",
+    "albums"
+  ],
+  "author": "BastanR",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@types/uuid": "^9.0.0",
+    "axios": "^1.3.2",
+    "dotenv": "^16.0.3",
+    "luxon": "^3.2.1",
+    "mongodb": "^5.0.0",
+    "nodemailer": "^6.9.1",
+    "uuid": "^9.0.0"
+  }
+}
