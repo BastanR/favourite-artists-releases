@@ -18,7 +18,7 @@ export async function getArtists(user, apiKey) {
     return response.data.topartists.artist.map(
       (artist) => ({
         _id: uuidv4(),
-        name: artist.name,
+        name: artist.name.toLowerCase(),
         createdAt: new Date(),
       })
     );

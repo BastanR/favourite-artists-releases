@@ -1,76 +1,84 @@
-import * as dotenv from "dotenv";
 import axios from "axios";
 import { DateTime } from "luxon";
-
-dotenv.config();
-
-const [, , country = 'US'] = process.argv;
+import { config } from '../../config.js';
 
 export async function getReleases() {
+  const albums = [];
+  const singles = [];
+
   try {
-    // retrieve access token
-    const response = await axios({
-      method: 'POST',
-      url: 'https://accounts.spotify.com/api/token',
+    // use access token to retrieve new releases
+    const albumsResponse = await axios({
+      method: 'GET',
+      url: 'https://api.discogs.com/database/search',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64')
+        'Authorization': `Discogs key=${config.discogsConsumerKey}, secret=${config.discogsConsumerSecret}`
       },
-      data: 'grant_type=client_credentials'
-    });
-
-    const accessToken = response.data.access_token;
-
-    // use access token to retrieve new releases
-    const newReleasesResponse = await axios({
-      method: 'GET',
-      url: 'https://api.spotify.com/v1/browse/new-releases',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      },
+      data: 'grant_type=client_credentials',
       params: {
-        limit: 50,
-        country: country
+        sort: 'date_added,desc',
+        year: DateTime.now().year,
+        format_exact: 'Album',
+        type: 'master',
+        per_page: 100
       }
     });
 
-    const albums = [];
-    const singles = [];
+    albumsResponse.data.results.forEach((album) => {
+      const [artist = '', releaseName = ''] = album.title.split(' - ');
 
-    newReleasesResponse.data.albums.items.forEach((album) => {
-      if (album.release_date < DateTime.now().minus({ month: 1 }).toISO()) return;
+      if (artist.toLowerCase() === 'various') return;
 
-      if (album.album_type === 'single') {
-        album.artists.forEach((albumArtist) => {
-          if (albumArtist.type === 'artist') {
-            singles.push({
-              artist: albumArtist.name,
-              releaseName: album.name,
-              releaseDate: album.release_date,
-              releaseId: album.id,
-              href: album.href
-            })
-          }
-        })
-      }
-
-      if (album.album_type === 'album') {
-        album.artists.forEach((albumArtist) => {
-          if (albumArtist.type === 'artist') {
-            albums.push({
-              artist: albumArtist.name,
-              releaseName: album.name,
-              releaseDate: album.release_date,
-              releaseId: album.id,
-              href: album.href
-            })
-          }
-        })
-      }
-    });
-
-    return { albums, singles };
+      albums.push({
+        artist: artist.replace(/\*/g, '').toLowerCase(),
+        releaseName: releaseName,
+        releaseDate: album.year,
+        releaseId: album.id,
+        href: album.master_url,
+        sent: false
+      })
+    })
   } catch (error) {
     console.error(error);
   }
+
+  try {
+    // use access token to retrieve new releases
+    const singlesResponse = await axios({
+      method: 'GET',
+      url: 'https://api.discogs.com/database/search',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Discogs key=${config.discogsConsumerKey}, secret=${config.discogsConsumerSecret}`
+      },
+      data: 'grant_type=client_credentials',
+      params: {
+        sort: 'date_added,desc',
+        year: DateTime.now().year,
+        format_exact: 'Single',
+        type: 'master',
+        per_page: 100
+      }
+    });
+
+    singlesResponse.data.results.forEach((single) => {
+      const [artist = '', releaseName = ''] = single.title.split(' - ');
+
+      if (artist.toLowerCase() === 'various') return;
+
+      singles.push({
+        artist: artist.replace(/\*/g, '').toLowerCase(),
+        releaseName: releaseName,
+        releaseDate: single.year,
+        releaseId: single.id,
+        href: single.master_url,
+        sent: false
+      })
+    })
+  } catch (error) {
+    console.error(error);
+  }
+
+  return { albums, singles }
 }

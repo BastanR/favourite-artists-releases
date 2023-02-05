@@ -1,5 +1,4 @@
-// import { getReleases } from "./getReleases.js";
-import { getReleases } from "../addSingles/getReleases.js";
+import { getReleases } from "./getReleases.js";
 import { v4 as uuidv4 } from "uuid";
 import { config } from "../../config.js";
 

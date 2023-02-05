@@ -1,0 +1,76 @@
+import axios from "axios";
+import { DateTime } from "luxon";
+import { config } from '../../config.js';
+
+const [, , country = 'US'] = process.argv;
+
+export async function getReleases() {
+  try {
+    // retrieve access token
+    const response = await axios({
+      method: 'POST',
+      url: 'https://accounts.spotify.com/api/token',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + Buffer.from(`${config.spotifyClientId}:${config.spotifyClientSecret}`).toString('base64')
+      },
+      data: 'grant_type=client_credentials'
+    });
+
+    const accessToken = response.data.access_token;
+
+    // use access token to retrieve new releases
+    const newReleasesResponse = await axios({
+      method: 'GET',
+      url: 'https://api.spotify.com/v1/browse/new-releases',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      },
+      params: {
+        limit: 50,
+        country: country
+      }
+    });
+
+    const albums = [];
+    const singles = [];
+
+    newReleasesResponse.data.albums.items.forEach((album) => {
+      if (album.release_date < DateTime.now().minus({ month: 1 }).toISO()) return;
+
+      if (album.album_type === 'single') {
+        album.artists.forEach((albumArtist) => {
+          if (albumArtist.type === 'artist') {
+            singles.push({
+              artist: albumArtist.name.toLowerCase(),
+              releaseName: album.name,
+              releaseDate: album.release_date,
+              releaseId: album.id,
+              href: album.href,
+              sent: false
+            })
+          }
+        })
+      }
+
+      if (album.album_type === 'album') {
+        album.artists.forEach((albumArtist) => {
+          if (albumArtist.type === 'artist') {
+            albums.push({
+              artist: albumArtist.name.toLowerCase(),
+              releaseName: album.name,
+              releaseDate: album.release_date,
+              releaseId: album.id,
+              href: album.href,
+              sent: false
+            })
+          }
+        })
+      }
+    });
+
+    return { albums, singles };
+  } catch (error) {
+    console.error(error);
+  }
+}
