@@ -10,7 +10,7 @@ export async function getArtists(user, apiKey) {
           user: user,
           api_key: apiKey,
           format: "json",
-          limit: 500,
+          limit: 1000,
         },
       }
     );
