@@ -1,3 +1,4 @@
+// import { getReleases } from "./getReleases.js";
 import { getReleases } from "./getReleases.js";
 import { v4 as uuidv4 } from "uuid";
 import { config } from "../../config.js";
@@ -9,22 +10,11 @@ async function run() {
     const newReleases = await getReleases();
     const database = client.db("fard");
     const topArtists = await database.collection('topArtists').find().toArray();
-    const singlesCollection = database.collection('singles');
     const albumsCollection = database.collection('albums');
-    const topArtistsNames = topArtists.map(artist => artist.name);
-
-    for (const release of newReleases.singles) {
-      if (topArtistsNames.includes(release.artist)) {
-        await singlesCollection.insertOne({
-          _id: uuidv4(),
-          createdAt: new Date(),
-          ...release
-        });
-      }
-    }
+    const topArtistsNames = topArtists.map(artist => artist.name.toLowerCase());
 
     for (const release of newReleases.albums) {
-      if (topArtistsNames.includes(release.artist)) {
+      if (topArtistsNames.includes(release.artist.toLowerCase())) {
         await albumsCollection.insertOne({
           _id: uuidv4(),
           createdAt: new Date(),

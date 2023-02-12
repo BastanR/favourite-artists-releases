@@ -42,7 +42,7 @@ export async function getReleases() {
         album.artists.forEach((albumArtist) => {
           if (albumArtist.type === 'artist') {
             singles.push({
-              artist: albumArtist.name.toLowerCase(),
+              artist: albumArtist.name,
               releaseName: album.name,
               releaseDate: album.release_date,
               releaseId: album.id,
@@ -57,7 +57,7 @@ export async function getReleases() {
         album.artists.forEach((albumArtist) => {
           if (albumArtist.type === 'artist') {
             albums.push({
-              artist: albumArtist.name.toLowerCase(),
+              artist: albumArtist.name,
               releaseName: album.name,
               releaseDate: album.release_date,
               releaseId: album.id,

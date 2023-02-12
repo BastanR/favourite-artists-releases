@@ -1,12 +1,13 @@
 {
   "name": "favourite-artists-releases",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "List of releases by favourite artists",
   "main": "index.js",
   "scripts": {
     "init": "",
     "getArtists": "node ./src/getArtists/index.js",
-    "getReleases": "node ./src/getReleases/index.js",
+    "getDiscogsReleases": "node ./src/getDiscogsReleases/index.js",
+    "getSpotifyReleases": "node ./src/getSpotifyReleases/index.js",
     "sendDigest": "node ./src/sendDigest/index.js"
   },
   "keywords": [
